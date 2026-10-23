@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.liuzhen._02301020417.mapper.DrugMapper">
+
+    <sql id="drugColumns">
+        drug_id               AS drugId,
+        drug_name             AS drugName,
+        drug_type             AS drugType,
+        indication,
+        applicable_department AS applicableDepartment,
+        dosage_form           AS dosageForm,
+        specification,
+        manufacturer,
+        unit_price            AS unitPrice,
+        stock_quantity        AS stockQuantity,
+        status
+    </sql>
+
+    <select id="getAllDrug" resultType="com.liuzhen._02301020417.model.Drug">
+        SELECT <include refid="drugColumns"/>
+        FROM drug
+        ORDER BY drug_name ASC
+    </select>
+
+    <select id="getDrugPage" parameterType="map" resultType="com.liuzhen._02301020417.model.Drug">
+        SELECT <include refid="drugColumns"/>
+        FROM drug
+        ORDER BY drug_name ASC
+        LIMIT #{pageSize} OFFSET #{offset}
+    </select>
+
+    <select id="getDrugCount" resultType="int">
+        SELECT COUNT(*) FROM drug
+    </select>
+
+    <select id="getDrugById" parameterType="java.lang.Integer"
+            resultType="com.liuzhen._02301020417.model.Drug">
+        SELECT <include refid="drugColumns"/>
+        FROM drug
+        WHERE drug_id = #{drugId}
+    </select>
+
+    <select id="getDrugForUpdate" parameterType="java.lang.Integer"
+            resultType="com.liuzhen._02301020417.model.Drug">
+        SELECT <include refid="drugColumns"/>
+        FROM drug
+        WHERE drug_id = #{drugId}
+        FOR UPDATE
+    </select>
+
+    <insert id="addDrug" parameterType="com.liuzhen._02301020417.model.Drug"
+            useGeneratedKeys="true" keyProperty="drugId">
+        INSERT INTO drug(drug_name, drug_type, indication, applicable_department, dosage_form,
+                         specification, manufacturer, unit_price, stock_quantity, status)
+        VALUES(#{drugName}, #{drugType}, #{indication}, #{applicableDepartment}, #{dosageForm},
+               #{specification}, #{manufacturer}, #{unitPrice}, #{stockQuantity}, #{status})
+    </insert>
+
+    <update id="updateDrug" parameterType="com.liuzhen._02301020417.model.Drug">
+        UPDATE drug
+        SET drug_name             = #{drugName},
+            drug_type             = #{drugType},
+            indication            = #{indication},
+            applicable_department = #{applicableDepartment},
+            dosage_form           = #{dosageForm},
+            specification         = #{specification},
+            manufacturer          = #{manufacturer},
+            unit_price            = #{unitPrice},
+            stock_quantity        = #{stockQuantity},
+            status                = #{status}
+        WHERE drug_id = #{drugId}
+    </update>
+
+    <update id="decreaseStock">
+        UPDATE drug
+        SET stock_quantity = stock_quantity - #{quantity}
+        WHERE drug_id = #{drugId}
+          AND stock_quantity >= #{quantity}
+    </update>
+
+    <delete id="deleteDrug" parameterType="java.lang.Integer">
+        DELETE FROM drug WHERE drug_id = #{drugId}
+    </delete>
+
+</mapper>

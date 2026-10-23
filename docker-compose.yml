@@ -1,0 +1,54 @@
+services:
+  mysql:
+    image: mysql:8.0
+    container_name: his-mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:-change_me}
+      MYSQL_DATABASE: ${MYSQL_DATABASE:-HIS}
+      MYSQL_USER: ${MYSQL_USER:-root}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD:-change_me}
+      TZ: Asia/Shanghai
+    command: --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci
+    volumes:
+      - mysql_data:/var/lib/mysql
+      - ./database/schema.sql:/docker-entrypoint-initdb.d/01-schema.sql:ro
+    healthcheck:
+      test: ["CMD-SHELL", "mysqladmin ping -h 127.0.0.1 -u root -p$$MYSQL_ROOT_PASSWORD --silent"]
+      interval: 5s
+      timeout: 5s
+      retries: 30
+    ports:
+      - "3306:3306"
+
+  backend:
+    build: ./202301020417
+    container_name: his-backend
+    environment:
+      SERVER_PORT: "8081"
+      DB_URL: jdbc:mysql://mysql:3306/${MYSQL_DATABASE:-HIS}?useUnicode=true&characterEncoding=utf8&serverTimezone=Asia/Shanghai&useSSL=false&allowPublicKeyRetrieval=true
+      DB_USERNAME: ${MYSQL_USER:-root}
+      DB_PASSWORD: ${MYSQL_PASSWORD:-change_me}
+      JWT_SECRET: ${JWT_SECRET:-change_me_at_least_32_characters_long}
+      JWT_EXPIRATION_MS: ${JWT_EXPIRATION_MS:-86400000}
+      SEED_USERS: "true"
+      DEFAULT_PASSWORD: ${DEFAULT_PASSWORD:-123456}
+      TZ: Asia/Shanghai
+    depends_on:
+      mysql:
+        condition: service_healthy
+    ports:
+      - "8081:8081"
+
+  frontend:
+    build:
+      context: ./Coursedesign
+      args:
+        VITE_API_BASE_URL: http://localhost:8081
+    container_name: his-frontend
+    depends_on:
+      - backend
+    ports:
+      - "80:80"
+
+volumes:
+  mysql_data:

@@ -1,0 +1,110 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.liuzhen._02301020417.mapper.DoctorScheduleMapper">
+
+    <sql id="scheduleColumns">
+        schedule_id     AS scheduleId,
+        doctor_id       AS doctorId,
+        schedule_date   AS scheduleDate,
+        shift_type      AS shiftType,
+        start_time      AS startTime,
+        end_time        AS endTime,
+        department_id   AS departmentId,
+        room_number     AS roomNumber,
+        max_patients    AS maxPatients,
+        remaining_slots AS remainingSlots,
+        status
+    </sql>
+
+    <select id="getAllSchedule" resultType="com.liuzhen._02301020417.model.DoctorSchedule">
+        SELECT <include refid="scheduleColumns"/>
+        FROM doctor_schedule
+        ORDER BY schedule_date DESC, start_time ASC
+    </select>
+
+    <select id="getScheduleById" parameterType="java.lang.Integer"
+            resultType="com.liuzhen._02301020417.model.DoctorSchedule">
+        SELECT <include refid="scheduleColumns"/>
+        FROM doctor_schedule
+        WHERE schedule_id = #{scheduleId}
+    </select>
+
+    <select id="getScheduleForUpdate" parameterType="java.lang.Integer"
+            resultType="com.liuzhen._02301020417.model.DoctorSchedule">
+        SELECT <include refid="scheduleColumns"/>
+        FROM doctor_schedule
+        WHERE schedule_id = #{scheduleId}
+        FOR UPDATE
+    </select>
+
+    <select id="findAvailableScheduleForUpdate" parameterType="java.lang.Integer"
+            resultType="com.liuzhen._02301020417.model.DoctorSchedule">
+        SELECT <include refid="scheduleColumns"/>
+        FROM doctor_schedule
+        WHERE doctor_id = #{doctorId}
+          AND status = 1
+          AND remaining_slots > 0
+          AND schedule_date >= CURDATE()
+        ORDER BY schedule_date ASC, start_time ASC
+        LIMIT 1
+        FOR UPDATE
+    </select>
+
+    <select id="findAvailableScheduleForUpdateByDate"
+            resultType="com.liuzhen._02301020417.model.DoctorSchedule">
+        SELECT <include refid="scheduleColumns"/>
+        FROM doctor_schedule
+        WHERE doctor_id = #{doctorId}
+          AND status = 1
+          AND remaining_slots > 0
+          AND schedule_date = #{scheduleDate}
+        ORDER BY start_time ASC
+        LIMIT 1
+        FOR UPDATE
+    </select>
+
+    <select id="getScheduleByDoctorId" parameterType="java.lang.Integer"
+            resultType="com.liuzhen._02301020417.model.DoctorSchedule">
+        SELECT <include refid="scheduleColumns"/>
+        FROM doctor_schedule
+        WHERE doctor_id = #{doctorId}
+        ORDER BY schedule_date DESC, start_time ASC
+    </select>
+
+    <insert id="addSchedule" parameterType="com.liuzhen._02301020417.model.DoctorSchedule"
+            useGeneratedKeys="true" keyProperty="scheduleId">
+        INSERT INTO doctor_schedule(doctor_id, schedule_date, shift_type, start_time, end_time,
+                                    department_id, room_number, max_patients, remaining_slots, status)
+        VALUES(#{doctorId}, #{scheduleDate}, #{shiftType}, #{startTime}, #{endTime},
+               #{departmentId}, #{roomNumber}, #{maxPatients},
+               COALESCE(#{remainingSlots}, #{maxPatients}), #{status})
+    </insert>
+
+    <update id="updateSchedule" parameterType="com.liuzhen._02301020417.model.DoctorSchedule">
+        UPDATE doctor_schedule
+        SET doctor_id       = #{doctorId},
+            schedule_date   = #{scheduleDate},
+            shift_type      = #{shiftType},
+            start_time      = #{startTime},
+            end_time        = #{endTime},
+            department_id   = #{departmentId},
+            room_number     = #{roomNumber},
+            max_patients    = #{maxPatients},
+            remaining_slots = COALESCE(#{remainingSlots}, remaining_slots),
+            status          = #{status}
+        WHERE schedule_id = #{scheduleId}
+    </update>
+
+    <update id="decreaseSlots" parameterType="java.lang.Integer">
+        UPDATE doctor_schedule
+        SET remaining_slots = remaining_slots - 1
+        WHERE schedule_id = #{scheduleId}
+          AND remaining_slots > 0
+    </update>
+
+    <delete id="deleteSchedule" parameterType="java.lang.Integer">
+        DELETE FROM doctor_schedule WHERE schedule_id = #{scheduleId}
+    </delete>
+
+</mapper>

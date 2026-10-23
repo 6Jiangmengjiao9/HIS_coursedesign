@@ -1,0 +1,12 @@
+.env
+*.db
+*.sqlite
+*.sqlite3
+target/
+dist/
+node_modules/
+.idea/
+.vscode/
+courseproject/
+.git_bak/
+*.log

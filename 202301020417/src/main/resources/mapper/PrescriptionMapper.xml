@@ -1,0 +1,112 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.liuzhen._02301020417.mapper.PrescriptionMapper">
+
+    <sql id="prescriptionColumns">
+        prescription_id   AS prescriptionId,
+        register_id       AS registerId,
+        patient_id        AS patientId,
+        doctor_id         AS doctorId,
+        prescription_date AS prescriptionDate,
+        drug_info         AS drugInfo,
+        diagnosis,
+        total_fee         AS totalFee,
+        status
+    </sql>
+
+    <select id="getAllPrescription" resultType="com.liuzhen._02301020417.model.Prescription">
+        SELECT <include refid="prescriptionColumns"/>
+        FROM prescription
+        ORDER BY prescription_date DESC
+    </select>
+
+    <select id="getPrescriptionPage" parameterType="map" resultType="com.liuzhen._02301020417.model.Prescription">
+        SELECT <include refid="prescriptionColumns"/>
+        FROM prescription
+        ORDER BY prescription_date DESC
+        LIMIT #{pageSize} OFFSET #{offset}
+    </select>
+
+    <select id="getPrescriptionCount" resultType="int">
+        SELECT COUNT(*) FROM prescription
+    </select>
+
+    <select id="getPrescriptionById" parameterType="java.lang.Integer"
+            resultType="com.liuzhen._02301020417.model.Prescription">
+        SELECT <include refid="prescriptionColumns"/>
+        FROM prescription
+        WHERE prescription_id = #{prescriptionId}
+    </select>
+
+    <select id="getPrescriptionForUpdate" parameterType="java.lang.Integer"
+            resultType="com.liuzhen._02301020417.model.Prescription">
+        SELECT <include refid="prescriptionColumns"/>
+        FROM prescription
+        WHERE prescription_id = #{prescriptionId}
+        FOR UPDATE
+    </select>
+
+    <select id="getPrescriptionByStatus" parameterType="java.lang.Integer"
+            resultType="com.liuzhen._02301020417.model.Prescription">
+        SELECT <include refid="prescriptionColumns"/>
+        FROM prescription
+        WHERE status = #{status}
+        ORDER BY prescription_date ASC
+    </select>
+
+    <select id="getPrescriptionByPatientId" parameterType="java.lang.Integer"
+            resultType="com.liuzhen._02301020417.model.Prescription">
+        SELECT <include refid="prescriptionColumns"/>
+        FROM prescription
+        WHERE patient_id = #{patientId}
+        ORDER BY prescription_date DESC
+    </select>
+
+    <select id="getPrescriptionByDoctorId" parameterType="java.lang.Integer"
+            resultType="com.liuzhen._02301020417.model.Prescription">
+        SELECT <include refid="prescriptionColumns"/>
+        FROM prescription
+        WHERE doctor_id = #{doctorId}
+        ORDER BY prescription_date DESC
+    </select>
+
+    <insert id="addPrescription" parameterType="com.liuzhen._02301020417.model.Prescription"
+            useGeneratedKeys="true" keyProperty="prescriptionId">
+        INSERT INTO prescription(register_id, patient_id, doctor_id, prescription_date,
+                                 drug_info, diagnosis, total_fee, status)
+        VALUES(#{registerId}, #{patientId}, #{doctorId}, #{prescriptionDate},
+               #{drugInfo}, #{diagnosis}, #{totalFee}, #{status})
+    </insert>
+
+    <update id="updatePrescription" parameterType="com.liuzhen._02301020417.model.Prescription">
+        UPDATE prescription
+        SET register_id       = #{registerId},
+            patient_id        = #{patientId},
+            doctor_id         = #{doctorId},
+            prescription_date = #{prescriptionDate},
+            drug_info         = #{drugInfo},
+            diagnosis         = #{diagnosis},
+            total_fee         = #{totalFee},
+            status            = #{status}
+        WHERE prescription_id = #{prescriptionId}
+    </update>
+
+    <update id="updatePrescriptionStatus">
+        UPDATE prescription
+        SET status = #{status}
+        WHERE prescription_id = #{prescriptionId}
+    </update>
+
+    <update id="updateTotalFeeAndStatus">
+        UPDATE prescription
+        SET total_fee = #{totalFee},
+            status    = #{status}
+        WHERE prescription_id = #{prescriptionId}
+    </update>
+
+    <delete id="deletePrescription" parameterType="java.lang.Integer">
+        DELETE FROM prescription WHERE prescription_id = #{prescriptionId}
+    </delete>
+
+</mapper>

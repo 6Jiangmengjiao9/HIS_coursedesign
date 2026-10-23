@@ -1,0 +1,87 @@
+:root {
+  --his-primary: #2f80ed;
+  --his-primary-dark: #1b64c7;
+  --his-primary-light: #eaf3ff;
+  --his-primary-soft: #f4f9ff;
+  --his-bg: #f2f8fe;
+  --his-surface: #ffffff;
+  --his-text: #1f3b57;
+  --his-text-regular: #3f5870;
+  --his-text-secondary: #6b7f95;
+  --his-border: #dbe8f5;
+  --his-border-strong: #c6dcf0;
+  --his-success: #2e9e6b;
+  --his-warning: #d99a1b;
+  --his-danger: #d9534f;
+  --his-shadow-sm: 0 2px 8px rgba(31, 75, 125, 0.06);
+  --his-shadow-md: 0 12px 32px rgba(31, 75, 125, 0.10);
+  --his-radius: 14px;
+  --his-radius-sm: 10px;
+
+  --el-color-primary: #2f80ed;
+  --el-color-primary-light-3: #6ba4f2;
+  --el-color-primary-light-5: #97c0f6;
+  --el-color-primary-light-7: #c3dcfa;
+  --el-color-primary-light-8: #d9e9fc;
+  --el-color-primary-light-9: #eef6ff;
+  --el-color-primary-dark-2: #1b64c7;
+
+  --el-color-success: #2e9e6b;
+  --el-color-warning: #d99a1b;
+  --el-color-danger: #d9534f;
+  --el-color-info: #6b7f95;
+
+  --el-bg-color: #ffffff;
+  --el-bg-color-page: #f2f8fe;
+  --el-text-color-primary: #1f3b57;
+  --el-text-color-regular: #3f5870;
+  --el-text-color-secondary: #6b7f95;
+  --el-text-color-placeholder: #9aacbd;
+  --el-border-color: #dbe8f5;
+  --el-border-color-light: #e6f0fa;
+  --el-border-color-lighter: #eef5fc;
+  --el-border-color-extra-light: #f5faff;
+  --el-fill-color: #f3f8ff;
+  --el-fill-color-light: #f7fbff;
+  --el-fill-color-lighter: #fafdff;
+  --el-fill-color-blank: #ffffff;
+  --el-border-radius-base: 9px;
+  --el-border-radius-small: 7px;
+  --el-border-radius-round: 999px;
+  --el-font-family: Inter, 'PingFang SC', 'Microsoft YaHei', 'Segoe UI', system-ui, sans-serif;
+  --el-box-shadow-light: 0 2px 8px rgba(31, 75, 125, 0.06);
+  --el-box-shadow: 0 12px 32px rgba(31, 75, 125, 0.10);
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  min-height: 100%;
+  background: var(--his-bg);
+}
+
+body {
+  min-height: 100vh;
+  margin: 0;
+  color: var(--his-text);
+  background:
+    radial-gradient(circle at 8% 0%, rgba(192, 222, 255, 0.45), transparent 32%),
+    radial-gradient(circle at 92% 8%, rgba(211, 235, 255, 0.55), transparent 30%),
+    linear-gradient(180deg, #f7fbff 0%, #eef6fe 100%);
+  background-attachment: fixed;
+  font-family: var(--el-font-family);
+  font-size: 14px;
+  line-height: 1.6;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+::selection {
+  background: #cfe4ff;
+  color: var(--his-text);
+}

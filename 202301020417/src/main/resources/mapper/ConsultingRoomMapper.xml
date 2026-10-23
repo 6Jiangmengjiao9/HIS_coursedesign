@@ -1,0 +1,97 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.liuzhen._02301020417.mapper.ConsultingRoomMapper">
+
+    <!-- 查询所有诊室 -->
+    <select id="getAllConsultingRoom" resultType="com.liuzhen._02301020417.model.ConsultingRoom">
+        SELECT room_id      AS roomId,
+               department_id AS departmentId,
+               room_number  AS roomNumber,
+               room_type    AS roomType,
+               capacity,
+               location,
+               status,
+               remark
+        FROM consulting_room
+        ORDER BY room_number ASC
+    </select>
+
+    <!-- 根据诊室ID查询 -->
+    <select id="getConsultingRoomById" parameterType="java.lang.Integer"
+            resultType="com.liuzhen._02301020417.model.ConsultingRoom">
+        SELECT room_id      AS roomId,
+               department_id AS departmentId,
+               room_number  AS roomNumber,
+               room_type    AS roomType,
+               capacity,
+               location,
+               status,
+               remark
+        FROM consulting_room
+        WHERE room_id = #{roomId}
+    </select>
+
+    <!-- 根据科室ID查询诊室列表 -->
+    <select id="getConsultingRoomByDepartmentId" parameterType="java.lang.String"
+            resultType="com.liuzhen._02301020417.model.ConsultingRoom">
+        SELECT room_id      AS roomId,
+               department_id AS departmentId,
+               room_number  AS roomNumber,
+               room_type    AS roomType,
+               capacity,
+               location,
+               status,
+               remark
+        FROM consulting_room
+        WHERE department_id = #{departmentId}
+        ORDER BY room_number ASC
+    </select>
+
+    <!-- 新增诊室 -->
+    <insert id="addConsultingRoom"
+            parameterType="com.liuzhen._02301020417.model.ConsultingRoom"
+            useGeneratedKeys="true"
+            keyProperty="roomId">
+        INSERT INTO consulting_room(
+            department_id,
+            room_number,
+            room_type,
+            capacity,
+            location,
+            status,
+            remark
+        )
+        VALUES(
+            #{departmentId},
+            #{roomNumber},
+            #{roomType},
+            #{capacity},
+            #{location},
+            #{status},
+            #{remark}
+        )
+    </insert>
+
+    <!-- 更新诊室 -->
+    <update id="updateConsultingRoom"
+            parameterType="com.liuzhen._02301020417.model.ConsultingRoom">
+        UPDATE consulting_room
+        SET department_id = #{departmentId},
+            room_number   = #{roomNumber},
+            room_type     = #{roomType},
+            capacity      = #{capacity},
+            location      = #{location},
+            status        = #{status},
+            remark        = #{remark}
+        WHERE room_id = #{roomId}
+    </update>
+
+    <!-- 删除诊室 -->
+    <delete id="deleteConsultingRoom" parameterType="java.lang.Integer">
+        DELETE FROM consulting_room WHERE room_id = #{roomId}
+    </delete>
+
+</mapper>
+
+

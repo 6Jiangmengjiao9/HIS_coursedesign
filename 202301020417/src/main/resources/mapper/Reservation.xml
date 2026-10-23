@@ -1,0 +1,135 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.liuzhen._02301020417.mapper.ReservationMapper">
+
+    <sql id="reservationColumns">
+        sr.id,
+        sr.department_id       AS departmentId,
+        sr.doctor_id           AS doctorId,
+        sr.patient_id          AS patientId,
+        sr.schedule_id         AS scheduleId,
+        sr.patient_name        AS patientName,
+        sr.patient_age         AS patientAge,
+        sr.patient_phone       AS patientPhone,
+        sr.reservation_status  AS reservationStatus,
+        sr.visit_status        AS visitStatus,
+        sr.register_status     AS registerStatus,
+        sr.creat_time          AS reservationTime,
+        d.department_name      AS departmentName,
+        doc.name               AS doctorName
+    </sql>
+
+    <insert id="addReservation" parameterType="com.liuzhen._02301020417.model.Reservation"
+            useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO simple_reservation(department_id, doctor_id, patient_id, schedule_id,
+                                       patient_name, patient_age, patient_phone,
+                                       reservation_status, visit_status, register_status, creat_time)
+        VALUES(#{departmentId}, #{doctorId}, #{patientId}, #{scheduleId},
+               #{patientName}, #{patientAge}, #{patientPhone},
+               #{reservationStatus}, #{visitStatus}, #{registerStatus}, #{reservationTime})
+    </insert>
+
+    <update id="updateReservation" parameterType="com.liuzhen._02301020417.model.Reservation">
+        UPDATE simple_reservation
+        SET department_id      = #{departmentId},
+            doctor_id          = #{doctorId},
+            patient_id         = #{patientId},
+            schedule_id        = #{scheduleId},
+            patient_name       = #{patientName},
+            patient_age        = #{patientAge},
+            patient_phone      = #{patientPhone},
+            reservation_status = #{reservationStatus},
+            visit_status       = #{visitStatus},
+            register_status    = #{registerStatus},
+            creat_time         = #{reservationTime}
+        WHERE id = #{id}
+    </update>
+
+    <update id="updateRegisterStatus">
+        UPDATE simple_reservation
+        SET register_status = #{registerStatus}
+        WHERE id = #{id}
+    </update>
+
+    <delete id="deleteReservation">
+        DELETE FROM simple_reservation WHERE id = #{id}
+    </delete>
+
+    <select id="getAllReservation" resultType="com.liuzhen._02301020417.model.Reservation">
+        SELECT <include refid="reservationColumns"/>
+        FROM simple_reservation sr
+                 LEFT JOIN department d ON sr.department_id = d.department_id
+                 LEFT JOIN doctor doc ON sr.doctor_id = doc.doctor_id
+        ORDER BY sr.creat_time DESC
+    </select>
+
+    <select id="getReservationPage" parameterType="map" resultType="com.liuzhen._02301020417.model.Reservation">
+        SELECT <include refid="reservationColumns"/>
+        FROM simple_reservation sr
+                 LEFT JOIN department d ON sr.department_id = d.department_id
+                 LEFT JOIN doctor doc ON sr.doctor_id = doc.doctor_id
+        ORDER BY sr.creat_time DESC
+        LIMIT #{pageSize} OFFSET #{offset}
+    </select>
+
+    <select id="getReservationCount" resultType="int">
+        SELECT COUNT(*) FROM simple_reservation
+    </select>
+
+    <select id="getReservationById" parameterType="java.lang.Integer"
+            resultType="com.liuzhen._02301020417.model.Reservation">
+        SELECT <include refid="reservationColumns"/>
+        FROM simple_reservation sr
+                 LEFT JOIN department d ON sr.department_id = d.department_id
+                 LEFT JOIN doctor doc ON sr.doctor_id = doc.doctor_id
+        WHERE sr.id = #{id}
+    </select>
+
+    <select id="getReservationForUpdate" parameterType="java.lang.Integer"
+            resultType="com.liuzhen._02301020417.model.Reservation">
+        SELECT id,
+               department_id      AS departmentId,
+               doctor_id          AS doctorId,
+               patient_id         AS patientId,
+               schedule_id        AS scheduleId,
+               patient_name       AS patientName,
+               patient_age        AS patientAge,
+               patient_phone      AS patientPhone,
+               reservation_status AS reservationStatus,
+               visit_status       AS visitStatus,
+               register_status    AS registerStatus,
+               creat_time         AS reservationTime
+        FROM simple_reservation
+        WHERE id = #{id}
+        FOR UPDATE
+    </select>
+
+    <select id="getReservationByDoctorIdAndStatus" resultType="com.liuzhen._02301020417.model.Reservation">
+        SELECT <include refid="reservationColumns"/>
+        FROM simple_reservation sr
+                 LEFT JOIN department d ON sr.department_id = d.department_id
+                 LEFT JOIN doctor doc ON sr.doctor_id = doc.doctor_id
+        WHERE sr.doctor_id = #{doctorId}
+          AND sr.register_status = #{registerStatus}
+        ORDER BY sr.creat_time ASC
+    </select>
+
+    <select id="getReservationByPatientId" parameterType="java.lang.Integer"
+            resultType="com.liuzhen._02301020417.model.Reservation">
+        SELECT <include refid="reservationColumns"/>
+        FROM simple_reservation sr
+                 LEFT JOIN department d ON sr.department_id = d.department_id
+                 LEFT JOIN doctor doc ON sr.doctor_id = doc.doctor_id
+        WHERE sr.patient_id = #{patientId}
+        ORDER BY sr.creat_time DESC
+    </select>
+
+    <select id="countByPatientAndSchedule" resultType="int">
+        SELECT COUNT(*)
+        FROM simple_reservation
+        WHERE patient_id = #{patientId}
+          AND schedule_id = #{scheduleId}
+    </select>
+
+</mapper>

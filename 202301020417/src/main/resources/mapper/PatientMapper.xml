@@ -1,0 +1,203 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.liuzhen._02301020417.mapper.PatientMapper">
+    <select id="getPatientById" parameterType="java.lang.Integer"
+            resultType="com.liuzhen._02301020417.model.Patient">
+        SELECT patient_id AS patientId,
+               name,
+               gender,
+               age,
+               address,
+               id_card AS idCard,
+               contact,
+               create_time AS createTime,
+               doctor_id AS doctorId
+        FROM patient
+        WHERE patient_id = #{patientId}
+    </select>
+
+    <insert id="addPatient" parameterType="com.liuzhen._02301020417.model.Patient" useGeneratedKeys="true" keyProperty="patientId">
+        insert into patient(name,gender,age,address,id_card,contact,create_time,doctor_id)
+        values(#{name},#{gender},#{age},#{address},#{idCard},#{contact},#{createTime},#{doctorId})
+    </insert>
+    <insert id="addCaseInfo" parameterType="com.liuzhen._02301020417.model.Case">
+        insert into medical_record(patient_id,chief_complaint,present_illness,past_history,physical_exam,auxiliary_exam,diagnosis,entry_time)
+        values(#{patientId},#{chiefComplaint},#{presentIllness},#{pastHistory},#{physicalExam},#{auxiliaryExam},#{diagnosis},#{entryTime})
+    </insert>
+    <!-- 根据患者ID新增一条病历记录（仅操作medical_record表） -->
+    <insert id="addMedicalRecordByPatientId" parameterType="com.liuzhen._02301020417.model.Case">
+        insert into medical_record(patient_id,chief_complaint,present_illness,past_history,physical_exam,auxiliary_exam,diagnosis,entry_time)
+        values(#{patientId},#{chiefComplaint},#{presentIllness},#{pastHistory},#{physicalExam},#{auxiliaryExam},#{diagnosis},#{entryTime})
+    </insert>
+    <!-- 根据患者ID更新已有病历记录（仅操作medical_record表） -->
+    <update id="updateMedicalRecordByPatientId" parameterType="com.liuzhen._02301020417.model.Case">
+        update medical_record
+        set chief_complaint=#{chiefComplaint},
+            present_illness=#{presentIllness},
+            past_history=#{pastHistory},
+            physical_exam=#{physicalExam},
+            auxiliary_exam=#{auxiliaryExam},
+            diagnosis=#{diagnosis},
+            entry_time=#{entryTime}
+        where patient_id=#{patientId}
+    </update>
+    <update id="updatePatient" parameterType="com.liuzhen._02301020417.model.Patient">
+        update patient
+        set name=#{name},
+            gender=#{gender},
+            age=#{age},
+            address=#{address},
+            id_card=#{idCard},
+            contact=#{contact},
+            create_time=#{createTime},
+            doctor_id=#{doctorId}
+        where patient_id=#{patientId}
+    </update>
+    <update id="updateCase">
+        update medical_record
+        set patient_id=#{patientId},chief_complaint=#{chiefComplaint},present_illness=#{presentIllness},past_history=#{pastHistory},physical_exam=#{physicalExam},auxiliary_exam=#{auxiliaryExam},diagnosis=#{diagnosis},entry_time=#{entryTime}
+        where record_id=#{recordId}
+    </update>
+    <delete id="deletePatient">
+        delete from patient where patient_id=#{patientId}
+    </delete>
+    <delete id="deleteCase">
+        delete from medical_record where patient_id=#{patientId}
+    </delete>
+
+
+    <select id="getAllPatient" resultMap="patientWithCaseAndDoctorMap">
+        SELECT patient.*,
+               medical_record.record_id AS mr_id,
+               medical_record.patient_id AS mr_patient_id,
+               medical_record.chief_complaint AS mr_chief_complaint,
+               medical_record.present_illness AS mr_present_illness,
+               medical_record.past_history AS mr_past_history,
+               medical_record.physical_exam AS mr_physical_exam,
+               medical_record.auxiliary_exam AS mr_auxiliary_exam,
+               medical_record.diagnosis AS mr_diagnosis,
+               medical_record.entry_time AS mr_entry_time,
+               doctor.doctor_id AS d_doctor_id,
+               doctor.user_id AS d_user_id,
+               doctor.name AS d_name,
+               doctor.department_id AS d_department_id,
+               doctor.title AS d_title,
+               doctor.userinfo_id AS d_userinfo_id
+        FROM patient
+                 LEFT JOIN medical_record
+                           ON patient.patient_id = medical_record.patient_id
+                 LEFT JOIN doctor
+                           ON patient.doctor_id = doctor.doctor_id
+    </select>
+
+    <!-- 分页查询患者列表 -->
+    <select id="getPatientPage" parameterType="map" resultMap="patientWithCaseAndDoctorMap">
+        SELECT patient.*,
+               medical_record.record_id AS mr_id,
+               medical_record.patient_id AS mr_patient_id,
+               medical_record.chief_complaint AS mr_chief_complaint,
+               medical_record.present_illness AS mr_present_illness,
+               medical_record.past_history AS mr_past_history,
+               medical_record.physical_exam AS mr_physical_exam,
+               medical_record.auxiliary_exam AS mr_auxiliary_exam,
+               medical_record.diagnosis AS mr_diagnosis,
+               medical_record.entry_time AS mr_entry_time,
+               doctor.doctor_id AS d_doctor_id,
+               doctor.user_id AS d_user_id,
+               doctor.name AS d_name,
+               doctor.department_id AS d_department_id,
+               doctor.title AS d_title,
+               doctor.userinfo_id AS d_userinfo_id
+        FROM patient
+                 LEFT JOIN medical_record
+                           ON patient.patient_id = medical_record.patient_id
+                 LEFT JOIN doctor
+                           ON patient.doctor_id = doctor.doctor_id
+        ORDER BY patient.patient_id
+        LIMIT #{pageSize} OFFSET #{offset}
+    </select>
+
+    <!-- 患者总数，用于分页 -->
+    <select id="getPatientCount" resultType="int">
+        SELECT COUNT(*) FROM patient
+    </select>
+
+    <!-- 根据患者ID查询该患者的所有病历记录 -->
+    <select id="getCasesByPatientId" parameterType="java.lang.Integer"
+            resultType="com.liuzhen._02301020417.model.Case">
+        SELECT
+            record_id       AS recordId,
+            patient_id      AS patientId,
+            chief_complaint AS chiefComplaint,
+            present_illness AS presentIllness,
+            past_history    AS pastHistory,
+            physical_exam   AS physicalExam,
+            auxiliary_exam  AS AuxiliaryExam,
+            diagnosis,
+            entry_time      AS entryTime
+        FROM medical_record
+        WHERE patient_id = #{patientId}
+        ORDER BY entry_time DESC
+    </select>
+    <resultMap id="patientWithCaseMap" type="com.liuzhen._02301020417.model.Patient">
+        <!-- 患者表（patient）字段映射 -->
+        <id column="patient_id" property="patientId"/> <!-- 主键映射：数据库patient_id → 实体patientId -->
+        <result column="name" property="name"/>
+        <result column="gender" property="gender"/>
+        <result column="age" property="age"/>
+        <result column="address" property="address"/>
+        <result column="id_card" property="idCard"/> <!-- 数据库id_card → 实体idCard（下划线转驼峰） -->
+        <result column="contact" property="contact"/>
+        <result column="create_time" property="createTime"/> <!-- 数据库create_time → 实体createTime -->
+
+        <!-- 一对一关联病历表（medical_record），映射到Case实体 -->
+        <association property="caseInfo" javaType="com.liuzhen._02301020417.model.Case">
+            <id column="mr_id" property="recordId"/> <!-- 查询别名mr_id → Case.recordId -->
+            <result column="mr_patient_id" property="patientId"/> <!-- 别名mr_patient_id → Case.patientId -->
+            <result column="mr_chief_complaint" property="chiefComplaint"/> <!-- 别名mr_chief_complaint → Case.chiefComplaint -->
+            <result column="mr_present_illness" property="presentIllness"/> <!-- 别名mr_present_illness → Case.presentIllness -->
+            <result column="mr_past_history" property="pastHistory"/> <!-- 别名mr_past_history → Case.pastHistory -->
+            <result column="mr_physical_exam" property="physicalExam"/> <!-- 别名mr_physical_exam → Case.physicalExam -->
+            <result column="mr_auxiliary_exam" property="auxiliaryExam"/> <!-- 别名mr_auxiliary_exam → Case.auxiliaryExam -->
+            <result column="mr_diagnosis" property="diagnosis"/> <!-- 别名mr_diagnosis → Case.diagnosis -->
+            <result column="mr_entry_time" property="entryTime"/> <!-- 别名mr_entry_time → Case.entryTime -->
+        </association>
+    </resultMap>
+    <!-- 患者(Patient)关联病历(Case)和医生(Doctor)的resultMap -->
+    <resultMap id="patientWithCaseAndDoctorMap" type="com.liuzhen._02301020417.model.Patient">
+        <!-- 患者表（patient）字段映射 -->
+        <id column="patient_id" property="patientId"/> <!-- 主键映射：数据库patient_id → 实体patientId -->
+        <result column="name" property="name"/> <!-- name → name（String） -->
+        <result column="gender" property="gender"/> <!-- gender → gender（String） -->
+        <result column="age" property="age"/> <!-- age → age（Integer） -->
+        <result column="address" property="address"/> <!-- address → address（String） -->
+        <result column="id_card" property="idCard"/> <!-- 数据库id_card → 实体idCard（下划线转驼峰） -->
+        <result column="contact" property="contact"/> <!-- contact → contact（String） -->
+        <result column="create_time" property="createTime"/> <!-- 数据库create_time → 实体createTime -->
+        <result column="doctor_id" property="doctorId"/> <!-- 数据库doctor_id → 实体doctorId（Integer） -->
+
+        <!-- 一对一关联病历表（medical_record），映射到Case实体 -->
+        <association property="caseInfo" javaType="com.liuzhen._02301020417.model.Case">
+            <id column="mr_id" property="recordId"/> <!-- 查询别名mr_id → Case.recordId -->
+            <result column="mr_patient_id" property="patientId"/> <!-- 别名mr_patient_id → Case.patientId -->
+            <result column="mr_chief_complaint" property="chiefComplaint"/> <!-- 别名mr_chief_complaint → Case.chiefComplaint -->
+            <result column="mr_present_illness" property="presentIllness"/> <!-- 别名mr_present_illness → Case.presentIllness -->
+            <result column="mr_past_history" property="pastHistory"/> <!-- 别名mr_past_history → Case.pastHistory -->
+            <result column="mr_physical_exam" property="physicalExam"/> <!-- 别名mr_physical_exam → Case.physicalExam -->
+            <result column="mr_auxiliary_exam" property="auxiliaryExam"/> <!-- 别名mr_auxiliary_exam → Case.auxiliaryExam -->
+            <result column="mr_diagnosis" property="diagnosis"/> <!-- 别名mr_diagnosis → Case.diagnosis -->
+            <result column="mr_entry_time" property="entryTime"/> <!-- 别名mr_entry_time → Case.entryTime -->
+        </association>
+
+        <!-- 一对一关联医生表（doctor），通过doctor_id关联 -->
+        <association property="doctor" javaType="com.liuzhen._02301020417.model.Doctor">
+            <id column="d_doctor_id" property="doctorId"/> <!-- 医生主键：d_doctor_id → doctorId（Integer） -->
+            <result column="d_user_id" property="userId"/> <!-- d_user_id → userId（String） -->
+            <result column="d_name" property="name"/> <!-- d_name → name（String）医生姓名 -->
+            <result column="d_department_id" property="departmentId"/> <!-- d_department_id → departmentId（String） -->
+            <result column="d_title" property="title"/> <!-- d_title → title（String） -->
+            <result column="d_userinfo_id" property="userinfoId"/> <!-- d_userinfo_id → userinfoId（Integer） -->
+        </association>
+    </resultMap>
+</mapper>

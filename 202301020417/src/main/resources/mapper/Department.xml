@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.liuzhen._02301020417.mapper.DepartmentMapper">
+    <update id="updateDepartment">
+        UPDATE department
+        SET department_name = #{departmentName},
+            introduction = #{introduction},
+            location = #{location},
+            phone = #{phone}
+        WHERE department_id = #{departmentId}
+    </update>
+
+    <!-- 1. 根据科室号查询单个科室及该科室的所有医生 -->
+    <select id="getDepartmentDoctorsFlat" resultType="com.liuzhen._02301020417.model.DepartmentFlat">
+        SELECT
+            de.department_id AS departmentId,
+            de.department_name AS departmentName,
+            de.introduction AS introduction,
+            de.location AS location,
+            de.phone AS phone,
+            d.doctor_id AS doctorId,
+            d.name AS doctorName,
+            d.title AS title,
+            d.user_id AS userId
+        FROM department de
+                 LEFT JOIN doctor d
+                           ON de.department_id = d.department_id
+        ORDER BY de.department_id, d.doctor_id
+    </select>
+
+    <resultMap id="departmentWithDoctorsMap" type="com.liuzhen._02301020417.model.DepartmentFlat">
+        <id column="科室ID" property="departmentId"/>  <!-- 对应SQL中的“科室ID”别名 -->
+        <result column="科室名称" property="departmentName"/>
+        <result column="科室简介" property="introduction"/>
+        <result column="科室位置" property="location"/>
+        <result column="科室电话" property="phone"/>
+        <result column="医生ID集合" property="doctorId"/>
+        <result column="医生姓名" property="doctorName"/>
+        <result column="医生职称" property="title"/>
+        <result column="医生用户ID" property="userId"/>
+</resultMap>
+
+
+</mapper>

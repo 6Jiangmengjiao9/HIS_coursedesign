@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.liuzhen._02301020417.mapper.PrescriptionItemMapper">
+
+    <insert id="batchInsert">
+        INSERT INTO prescription_item(prescription_id, medicine_id, quantity, unit_price)
+        VALUES
+        <foreach collection="items" item="item" separator=",">
+            (#{item.prescriptionId}, #{item.medicineId}, #{item.quantity}, #{item.unitPrice})
+        </foreach>
+    </insert>
+
+    <select id="getByPrescriptionId" parameterType="java.lang.Integer"
+            resultType="com.liuzhen._02301020417.model.PrescriptionItem">
+        SELECT pi.item_id       AS itemId,
+               pi.prescription_id AS prescriptionId,
+               pi.medicine_id   AS medicineId,
+               pi.quantity,
+               pi.unit_price    AS unitPrice,
+               d.drug_name      AS medicineName,
+               d.specification,
+               d.dosage_form    AS dosageForm
+        FROM prescription_item pi
+                 LEFT JOIN drug d ON pi.medicine_id = d.drug_id
+        WHERE pi.prescription_id = #{prescriptionId}
+        ORDER BY pi.item_id
+    </select>
+
+    <delete id="deleteByPrescriptionId" parameterType="java.lang.Integer">
+        DELETE FROM prescription_item WHERE prescription_id = #{prescriptionId}
+    </delete>
+
+</mapper>

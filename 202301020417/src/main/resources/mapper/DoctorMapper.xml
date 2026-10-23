@@ -1,0 +1,278 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.liuzhen._02301020417.mapper.DoctorMapper">
+    <!-- Doctor表操作 -->
+    <insert id="addDoctor" parameterType="com.liuzhen._02301020417.model.Doctor">
+        insert into doctor(user_id,name,department_id,title,userinfo_id)
+        values(#{userId},#{name},#{departmentId},#{title},#{userinfoId})
+    </insert>
+    <update id="updateDoctor" parameterType="com.liuzhen._02301020417.model.Doctor">
+        update doctor
+        set user_id=#{userId},
+            name=#{name},
+            department_id=#{departmentId},
+            title=#{title},
+            userinfo_id=#{userinfoId}
+        where doctor_id=#{doctorId}
+    </update>
+    <delete id="deleteDoctor">
+        delete from doctor where doctor_id=#{doctorId}
+    </delete>
+
+    <select id="getAllDoctor" resultMap="doctorWithUserInfoAndUserMap">
+        SELECT
+            d.doctor_id,
+            d.user_id,
+            d.name,
+            d.department_id,
+            d.title,
+            d.userinfo_id,
+            -- 科室表字段（起别名避免与医生表字段冲突）
+            de.department_id AS dept_id,
+            de.department_name AS dept_name,
+            de.introduction AS dept_intro,
+            de.location AS dept_location,
+            de.phone AS dept_phone,
+            -- userinfo表字段（起别名避免冲突）
+            ui.id AS ui_id,
+            ui.userid AS ui_userid,
+            ui.realname AS ui_realname,
+            ui.gender AS ui_gender,
+            ui.avatar AS ui_avatar,
+            -- user表字段（起别名避免冲突）
+            u.id AS u_id,
+            u.username AS u_username,
+            u.password AS u_password,
+            u.email AS u_email,
+            u.phone AS u_phone,
+            u.status AS u_status,
+            u.create_time AS u_create_time,
+            u.update_time AS u_update_time,
+            u.role AS u_role
+        FROM doctor d
+                 LEFT JOIN department de
+                           ON d.department_id = de.department_id
+                 LEFT JOIN userinfo ui
+                           ON d.userinfo_id = ui.id
+                 LEFT JOIN user u
+                           ON ui.userid = u.id
+    </select>
+
+    <!-- 分页查询医生列表 -->
+    <select id="getDoctorPage" parameterType="map" resultMap="doctorWithUserInfoAndUserMap">
+        SELECT
+            d.doctor_id,
+            d.user_id,
+            d.name,
+            d.department_id,
+            d.title,
+            d.userinfo_id,
+            -- 科室表字段（起别名避免与医生表字段冲突）
+            de.department_id AS dept_id,
+            de.department_name AS dept_name,
+            de.introduction AS dept_intro,
+            de.location AS dept_location,
+            de.phone AS dept_phone,
+            -- userinfo表字段（起别名避免冲突）
+            ui.id AS ui_id,
+            ui.userid AS ui_userid,
+            ui.realname AS ui_realname,
+            ui.gender AS ui_gender,
+            ui.avatar AS ui_avatar,
+            -- user表字段（起别名避免冲突）
+            u.id AS u_id,
+            u.username AS u_username,
+            u.password AS u_password,
+            u.email AS u_email,
+            u.phone AS u_phone,
+            u.status AS u_status,
+            u.create_time AS u_create_time,
+            u.update_time AS u_update_time,
+            u.role AS u_role
+        FROM doctor d
+                 LEFT JOIN department de
+                           ON d.department_id = de.department_id
+                 LEFT JOIN userinfo ui
+                           ON d.userinfo_id = ui.id
+                 LEFT JOIN user u
+                           ON ui.userid = u.id
+        ORDER BY d.doctor_id
+        LIMIT #{pageSize} OFFSET #{offset}
+    </select>
+
+    <!-- 医生总数，用于分页 -->
+    <select id="getDoctorCount" resultType="int">
+        SELECT COUNT(*) FROM doctor
+    </select>
+    <!-- 医生(Doctor)关联科室(Department)、用户信息(UserInfo)和用户(User)的resultMap -->
+    <resultMap id="doctorWithUserInfoAndUserMap" type="com.liuzhen._02301020417.model.Doctor">
+        <!-- 医生表(doctor)自身字段映射 -->
+        <id column="doctor_id" property="doctorId"/> <!-- 主键：数据库doctor_id → 实体doctorId（Integer） -->
+        <result column="user_id" property="userId"/> <!-- 数据库user_id → 实体userId（String） -->
+        <result column="name" property="name"/> <!-- 数据库name → 实体name（String） -->
+        <result column="department_id" property="departmentId"/> <!-- 数据库department_id → 实体departmentId（String） -->
+        <result column="title" property="title"/> <!-- 数据库title → 实体title（String） -->
+        <result column="userinfo_id" property="userinfoId"/> <!-- 数据库userinfo_id → 实体userinfoId（Integer） -->
+
+        <!-- 一对一关联科室表(department) -->
+        <association property="department" javaType="com.liuzhen._02301020417.model.Department">
+            <id column="dept_id" property="departmentId"/> <!-- 科室主键：dept_id → departmentId（String） -->
+            <result column="dept_name" property="departmentName"/> <!-- dept_name → departmentName（String） -->
+            <result column="dept_intro" property="introduction"/> <!-- dept_intro → introduction（String） -->
+            <result column="dept_location" property="location"/> <!-- dept_location → location（String） -->
+            <result column="dept_phone" property="phone"/> <!-- dept_phone → phone（String） -->
+        </association>
+
+        <!-- 一对一关联用户信息表(userinfo) -->
+        <association property="userInfo" javaType="com.liuzhen._02301020417.model.UserInfo">
+            <id column="ui_id" property="id"/> <!-- 用户信息主键：ui_id → id（int） -->
+            <result column="ui_userid" property="userid"/> <!-- ui_userid → userid（int） -->
+            <result column="ui_realname" property="realname"/> <!-- ui_realname → realname（String） -->
+            <result column="ui_gender" property="gender"/> <!-- ui_gender → gender（int） -->
+            <result column="ui_avatar" property="avatar"/> <!-- ui_avatar → avatar（String） -->
+        </association>
+
+        <!-- 一对一关联用户表(user)，通过userinfo关联 -->
+        <association property="user" javaType="com.liuzhen._02301020417.model.User">
+            <id column="u_id" property="id"/> <!-- 用户主键：u_id → id（int） -->
+            <result column="u_username" property="username"/> <!-- u_username → username（String） -->
+            <result column="u_password" property="password"/> <!-- u_password → password（String） -->
+            <result column="u_email" property="email"/> <!-- u_email → email（String） -->
+            <result column="u_phone" property="phone"/> <!-- u_phone → phone（String） -->
+            <result column="u_status" property="status"/> <!-- u_status → status（int） -->
+            <result column="u_create_time" property="create_Time"/> <!-- u_create_time → create_Time（Date） -->
+            <result column="u_update_time" property="update_Time"/> <!-- u_update_time → update_Time（Date） -->
+            <result column="u_role" property="role"/> <!-- u_role → role（String） -->
+        </association>
+    </resultMap>
+
+    <!-- User表操作 -->
+    <insert id="addUser" parameterType="com.liuzhen._02301020417.model.User" useGeneratedKeys="true" keyProperty="id">
+        insert into user(username,password,email,phone,status,create_time,update_time,role)
+        values(#{username},#{password},#{email},#{phone},#{status},now(),now(),#{role})
+    </insert>
+    <update id="updateUser" parameterType="com.liuzhen._02301020417.model.User">
+        update user
+        set username=#{username},
+            password=#{password},
+            email=#{email},
+            phone=#{phone},
+            status=#{status},
+            update_time=now(),
+            role=#{role}
+        where id=#{id}
+    </update>
+    <delete id="deleteUser">
+        delete from user where id=#{id}
+    </delete>
+
+    <select id="getAllUser" resultMap="userWithUserInfoMap">
+        SELECT user.*,
+               userinfo.id AS ui_id,
+               userinfo.userid AS ui_userid,
+               userinfo.realname AS ui_realname,
+               userinfo.gender AS ui_gender,
+               userinfo.avatar AS ui_avatar
+        FROM user
+                 LEFT JOIN userinfo
+                           ON user.id=userinfo.userid
+    </select>
+    <resultMap id="userWithUserInfoMap" type="com.liuzhen._02301020417.model.User">
+        <id column="id" property="id"/> <!-- 用户主键：id → id（int） -->
+        <result column="username" property="username"/> <!-- username → username（String） -->
+        <result column="password" property="password"/> <!-- password → password（String） -->
+        <result column="email" property="email"/> <!-- email → email（String） -->
+        <result column="phone" property="phone"/> <!-- phone → phone（String） -->
+        <result column="status" property="status"/> <!-- status → status（int） -->
+        <result column="create_time" property="create_Time"/> <!-- create_time → create_Time（Date） -->
+        <result column="update_time" property="update_Time"/> <!-- update_time → update_Time（Date） -->
+        <result column="role" property="role"/> <!-- role → role（String） -->
+        <!-- 一对一关联用户信息表(userinfo) -->
+        <association property="userInfo" javaType="com.liuzhen._02301020417.model.UserInfo">
+            <id column="ui_id" property="id"/> <!-- 用户信息主键：ui_id → id（int） -->
+            <result column="ui_userid" property="userid"/> <!-- ui_userid → userid（int） -->
+            <result column="ui_realname" property="realname"/> <!-- ui_realname → realname（String） -->
+            <result column="ui_gender" property="gender"/> <!-- ui_gender → gender（int） -->
+            <result column="ui_avatar" property="avatar"/> <!-- ui_avatar → avatar（String） -->
+        </association>
+    </resultMap>
+
+    <!-- UserInfo表操作 -->
+    <insert id="addUserInfo" parameterType="com.liuzhen._02301020417.model.UserInfo">
+        insert into userinfo(userid,realname,gender,avatar)
+        values(#{userid},#{realname},#{gender},#{avatar})
+    </insert>
+    <update id="updateUserInfo" parameterType="com.liuzhen._02301020417.model.UserInfo">
+        update userinfo
+        set userid=#{userid},
+            realname=#{realname},
+            gender=#{gender},
+            avatar=#{avatar}
+        where id=#{id}
+    </update>
+    <delete id="deleteUserInfo">
+        delete from userinfo where id=#{id}
+    </delete>
+
+    <select id="getAllUserInfo" resultMap="userInfoWithUserMap">
+        SELECT userinfo.*,
+               user.id AS u_id,
+               user.username AS u_username,
+               user.password AS u_password,
+               user.email AS u_email,
+               user.phone AS u_phone,
+               user.status AS u_status,
+               user.create_time AS u_create_time,
+               user.update_time AS u_update_time,
+               user.role AS u_role
+        FROM userinfo
+                 LEFT JOIN user
+                           ON userinfo.userid=user.id
+    </select>
+    <resultMap id="userInfoWithUserMap" type="com.liuzhen._02301020417.model.UserInfo">
+        <id column="id" property="id"/> <!-- 用户信息主键：id → id（int） -->
+        <result column="userid" property="userid"/> <!-- userid → userid（int） -->
+        <result column="realname" property="realname"/> <!-- realname → realname（String） -->
+        <result column="gender" property="gender"/> <!-- gender → gender（int） -->
+        <result column="avatar" property="avatar"/> <!-- avatar → avatar（String） -->
+        <!-- 一对一关联用户表(user) -->
+        <association property="user" javaType="com.liuzhen._02301020417.model.User">
+            <id column="u_id" property="id"/> <!-- 用户主键：u_id → id（int） -->
+            <result column="u_username" property="username"/> <!-- u_username → username（String） -->
+            <result column="u_password" property="password"/> <!-- u_password → password（String） -->
+            <result column="u_email" property="email"/> <!-- u_email → email（String） -->
+            <result column="u_phone" property="phone"/> <!-- u_phone → phone（String） -->
+            <result column="u_status" property="status"/> <!-- u_status → status（int） -->
+            <result column="u_create_time" property="create_Time"/> <!-- u_create_time → create_Time（Date） -->
+            <result column="u_update_time" property="update_Time"/> <!-- u_update_time → update_Time（Date） -->
+            <result column="u_role" property="role"/> <!-- u_role → role（String） -->
+        </association>
+    </resultMap>
+
+    <select id="getDoctorById" parameterType="java.lang.Integer"
+            resultType="com.liuzhen._02301020417.model.Doctor">
+        SELECT doctor_id     AS doctorId,
+               user_id       AS userId,
+               name,
+               department_id AS departmentId,
+               title,
+               userinfo_id   AS userinfoId
+        FROM doctor
+        WHERE doctor_id = #{doctorId}
+    </select>
+
+    <select id="getDoctorByUserId" parameterType="java.lang.Integer"
+            resultType="com.liuzhen._02301020417.model.Doctor">
+        SELECT doctor_id     AS doctorId,
+               user_id       AS userId,
+               name,
+               department_id AS departmentId,
+               title,
+               userinfo_id   AS userinfoId
+        FROM doctor
+        WHERE user_id = #{userId}
+        LIMIT 1
+    </select>
+
+</mapper>
