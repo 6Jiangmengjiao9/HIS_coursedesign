@@ -75,7 +75,9 @@ const patientName = (patientId) => {
 
 const doctorName = (doctorId) => {
   const doctor = doctors.value.find((item) => item.doctorId === doctorId)
-  return doctor ? doctor.name : `医生#${doctorId}`
+  if (!doctor) return `医生#${doctorId}`
+  const department = doctor.department?.departmentName
+  return department ? `${department}-${doctor.name}` : doctor.name
 }
 
 const money = (value) => Number(value || 0).toFixed(2)

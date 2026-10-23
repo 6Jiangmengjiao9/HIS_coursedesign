@@ -72,7 +72,8 @@ const loadDoctors = async () => {
       doctorOptions.value = (res.data.data || []).map(d => ({
         doctorId: d.doctorId,
         name: d.name,
-        departmentId: d.departmentId
+        departmentId: d.departmentId,
+        departmentName: d.department?.departmentName || ''
       }))
     }
   } catch (e) {
@@ -91,7 +92,8 @@ const loadSchedules = async () => {
         const doc = doctorOptions.value.find(d => d.doctorId === s.doctorId)
         return {
           ...s,
-          doctorName: doc ? doc.name : `医生ID ${s.doctorId}`
+          doctorName: doc ? doc.name : `医生ID ${s.doctorId}`,
+          departmentName: doc?.departmentName || ''
         }
       })
     } else {
@@ -284,7 +286,7 @@ onMounted(async () => {
             <el-option
               v-for="doc in doctorOptions"
               :key="doc.doctorId"
-              :label="doc.name"
+              :label="doc.departmentName ? `${doc.departmentName}-${doc.name}` : doc.name"
               :value="doc.doctorId"
             />
           </el-select>
@@ -319,8 +321,11 @@ onMounted(async () => {
       <!-- 排班列表 -->
       <el-table :data="filteredScheduleList" stripe border style="width: 100%;">
         <el-table-column prop="scheduleId" label="排班ID" width="90" />
-        <el-table-column prop="doctorName" label="医生" width="120" />
-        <el-table-column prop="departmentId" label="科室ID" width="100" />
+        <el-table-column label="医生" width="160">
+          <template #default="scope">
+            {{ scope.row.departmentName ? `${scope.row.departmentName}-${scope.row.doctorName}` : scope.row.doctorName }}
+          </template>
+        </el-table-column>
         <el-table-column label="日期" width="140">
           <template #default="scope">
             {{ formatDate(scope.row.scheduleDate) }}
@@ -387,7 +392,7 @@ onMounted(async () => {
                 <el-option
                   v-for="doc in doctorOptions"
                   :key="doc.doctorId"
-                  :label="doc.name"
+                  :label="doc.departmentName ? `${doc.departmentName}-${doc.name}` : doc.name"
                   :value="doc.doctorId"
                 />
               </el-select>

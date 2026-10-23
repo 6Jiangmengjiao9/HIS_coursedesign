@@ -59,7 +59,14 @@ const username = ref('')
 // 初始化用户名显示
 const initUsername = () => {
   const doctorName = localStorage.getItem('doctorName')
-  username.value = doctorName || localStorage.getItem('username') || ''
+  let realName = ''
+  try {
+    const userData = JSON.parse(localStorage.getItem('userData') || '{}')
+    realName = userData.userInfo?.realname || ''
+  } catch (e) {
+    realName = ''
+  }
+  username.value = doctorName || realName || localStorage.getItem('username') || ''
 }
 
 onMounted(() => {

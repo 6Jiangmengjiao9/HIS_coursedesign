@@ -128,7 +128,7 @@
           <el-option
             v-for="doctor in filteredDoctors"
             :key="doctor.doctorId"
-            :label="doctor.name"
+            :label="doctor.departmentName ? `${doctor.departmentName}-${doctor.name}` : doctor.name"
             :value="doctor.doctorId"
           ></el-option>
         </el-select>
@@ -323,7 +323,8 @@ export default {
           this.allDoctors = result.data.map(item => ({
             doctorId: item.doctorId,
             name: item.name,
-            departmentId: item.departmentId
+            departmentId: item.departmentId,
+            departmentName: item.department?.departmentName || ''
           }))
         }
       } catch (error) {

@@ -3,6 +3,7 @@ package com.liuzhen._02301020417.mapper;
 import com.liuzhen._02301020417.model.Case;
 import com.liuzhen._02301020417.model.Patient;
 import org.apache.ibatis.annotations.Mapper;
+import org.apache.ibatis.annotations.Param;
 
 import java.util.List;
 
@@ -17,6 +18,9 @@ public interface PatientMapper {
     public int getPatientCount();
 
     public Patient getPatientById(Integer patientId);
+
+    public int updatePatientDoctor(@Param("patientId") Integer patientId,
+                                   @Param("doctorId") Integer doctorId);
 
     public int addPatient(Patient patient);
     public int addCaseInfo(Case caseInfo);

@@ -108,7 +108,7 @@
           <el-option
             v-for="doctor in filteredDoctors"
             :key="doctor.doctorId"
-            :label="doctor.name"
+            :label="doctor.departmentName ? `${doctor.departmentName}-${doctor.name}` : doctor.name"
             :value="doctor.doctorId"
           ></el-option>
         </el-select>
@@ -418,6 +418,7 @@ const fetchAllDepartmentsAndDoctors = async () => {
           doctorId: parseInt(item.doctorId) || item.doctorId,
           name: item.doctorName,
           departmentId: deptId,
+          departmentName: item.departmentName || '',
           title: item.title || ''
         }
         

@@ -17,6 +17,12 @@
         WHERE patient_id = #{patientId}
     </select>
 
+    <update id="updatePatientDoctor">
+        UPDATE patient
+        SET doctor_id = #{doctorId}
+        WHERE patient_id = #{patientId}
+    </update>
+
     <insert id="addPatient" parameterType="com.liuzhen._02301020417.model.Patient" useGeneratedKeys="true" keyProperty="patientId">
         insert into patient(name,gender,age,address,id_card,contact,create_time,doctor_id)
         values(#{name},#{gender},#{age},#{address},#{idCard},#{contact},#{createTime},#{doctorId})

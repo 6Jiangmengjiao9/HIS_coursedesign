@@ -33,4 +33,6 @@ public interface ReservationMapper {
                                   @Param("scheduleId") Integer scheduleId);
 
     int updateRegisterStatus(@Param("id") Integer id, @Param("registerStatus") Integer registerStatus);
+
+    int updateVisitStatus(@Param("id") Integer id, @Param("visitStatus") Integer visitStatus);
 }

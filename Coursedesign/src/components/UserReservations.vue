@@ -435,37 +435,14 @@ const handleMarkVisited = async (row) => {
       type: 'warning'
     })
     
-    // 获取原始预约记录
-    const originalReservation = reservations.value.find(r => r.id === row.id)
-    if (!originalReservation) {
-      ElMessage.error('未找到预约记录')
-      return
-    }
-    
-    const requestData = {
-      id: row.id,
-      departmentId: originalReservation.departmentId,
-      doctorId: originalReservation.doctorId,
-      patientName: originalReservation.patientName,
-      patientAge: originalReservation.patientAge,
-      patientPhone: originalReservation.patientPhone,
-      reservationStatus: originalReservation.reservationStatus,
-      visitStatus: 1, // 标记为已就诊
-      reservationTime: originalReservation.reservationTime
-    }
-    
-    const response = await axios.post('/updateReservation', requestData, {
-      headers: {
-        'Content-Type': 'application/json'
-      }
-    })
+    const response = await axios.post(`/api/register-records/${row.id}/visit`)
     
     if (response.data.code === 0) {
       // 标记已就诊成功后，检查并添加患者
       await checkAndAddPatient(
-        originalReservation.patientName,
-        originalReservation.patientAge,
-        originalReservation.patientPhone
+        row.patientName,
+        row.patientAge,
+        row.patientPhone
       )
       
       ElMessage.success('已标记为已就诊')

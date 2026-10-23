@@ -10,6 +10,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -73,6 +74,14 @@ public class ReservationController {
                                     @AuthenticationPrincipal LoginUser operator) {
         int status = registerStatus == null ? 0 : registerStatus;
         return Result.ok().put("data", registrationService.listMine(operator, status));
+    }
+
+    @PreAuthorize("hasRole('DOCTOR')")
+    @RequestMapping(value = "/api/register-records/{id}/visit", method = RequestMethod.POST)
+    public Result markVisited(@PathVariable Integer id,
+                              @AuthenticationPrincipal LoginUser operator) {
+        return Result.ok().put("msg", "已标记为已就诊")
+                .put("data", registrationService.markVisited(id, operator));
     }
 
     @PreAuthorize("hasRole('PATIENT')")

@@ -57,12 +57,13 @@ const username = ref('')
 
 // 初始化用户名显示
 const initUsername = () => {
-  // 从localStorage获取患者信息
+  // 优先显示患者真实姓名
   const userData = localStorage.getItem('userData')
   if (userData) {
     try {
       const data = JSON.parse(userData)
-      username.value = data.name || data.username || localStorage.getItem('username') || ''
+      username.value = data.userInfo?.realname || data.name || data.username
+        || localStorage.getItem('username') || ''
     } catch (e) {
       username.value = localStorage.getItem('username') || ''
     }

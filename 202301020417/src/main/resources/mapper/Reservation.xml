@@ -52,6 +52,12 @@
         WHERE id = #{id}
     </update>
 
+    <update id="updateVisitStatus">
+        UPDATE simple_reservation
+        SET visit_status = #{visitStatus}
+        WHERE id = #{id}
+    </update>
+
     <delete id="deleteReservation">
         DELETE FROM simple_reservation WHERE id = #{id}
     </delete>

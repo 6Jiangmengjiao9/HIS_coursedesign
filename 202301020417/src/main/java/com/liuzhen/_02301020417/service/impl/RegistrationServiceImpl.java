@@ -132,6 +132,9 @@ public class RegistrationServiceImpl implements RegistrationService {
         reservation.setRegisterStatus(0);
         reservation.setReservationTime(buildReservationTime(schedule));
         reservationMapper.addReservation(reservation);
+        if (reservation.getPatientId() != null) {
+            patientMapper.updatePatientDoctor(reservation.getPatientId(), schedule.getDoctorId());
+        }
 
         auditLogService.record(operator, "REGISTER",
                 "挂号单ID=" + reservation.getId() + "，患者=" + reservation.getPatientName()
@@ -174,6 +177,33 @@ public class RegistrationServiceImpl implements RegistrationService {
             throw new BusinessException("未找到患者档案，请联系管理员");
         }
         return reservationMapper.getReservationByPatientId(patient.getPatientId());
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public Reservation markVisited(Integer id, LoginUser operator) {
+        Doctor doctor = doctorMapper.getDoctorByUserId(operator.getId());
+        if (doctor == null) {
+            throw new BusinessException(403, "当前账号未绑定医生信息");
+        }
+        Reservation reservation = reservationMapper.getReservationForUpdate(id);
+        if (reservation == null) {
+            throw new BusinessException("挂号单不存在");
+        }
+        if (!doctor.getDoctorId().equals(reservation.getDoctorId())) {
+            throw new BusinessException(403, "只能操作自己的挂号单");
+        }
+        if (reservation.getReservationStatus() == null || reservation.getReservationStatus() != 1) {
+            throw new BusinessException("该预约尚未生效");
+        }
+        if (reservation.getVisitStatus() != null && reservation.getVisitStatus() == 1) {
+            return reservation;
+        }
+        reservationMapper.updateVisitStatus(id, 1);
+        reservation.setVisitStatus(1);
+        auditLogService.record(operator, "VISIT",
+                "挂号单ID=" + id + "，患者=" + reservation.getPatientName() + "，标记已就诊");
+        return reservation;
     }
 
     private Date buildReservationTime(DoctorSchedule schedule) {

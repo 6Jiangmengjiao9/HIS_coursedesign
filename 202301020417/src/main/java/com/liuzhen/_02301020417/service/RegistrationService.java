@@ -13,4 +13,6 @@ public interface RegistrationService {
     List<Reservation> listMine(LoginUser operator, Integer registerStatus);
 
     List<Reservation> listMineForPatient(LoginUser operator);
+
+    Reservation markVisited(Integer id, LoginUser operator);
 }
