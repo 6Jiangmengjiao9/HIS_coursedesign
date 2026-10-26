@@ -4,6 +4,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.http.MediaType;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -35,6 +36,28 @@ class BusinessFlowTest extends BaseApiTest {
         Integer registerStatus = jdbcTemplate.queryForObject(
                 "SELECT register_status FROM simple_reservation WHERE id = 1", Integer.class);
         assertEquals(1, registerStatus);
+    }
+
+    @Test
+    void registrationTimeUsesLocalTimezone() throws Exception {
+        String patientToken = login("patient");
+        Map<String, Object> body = new HashMap<>();
+        body.put("doctorId", 1);
+        body.put("patientId", 2);
+        body.put("patientName", "患者乙");
+        body.put("patientAge", 58);
+        body.put("patientPhone", "13800000002");
+        body.put("departmentId", "D001");
+        body.put("scheduleId", 1);
+
+        mockMvc.perform(post("/api/register-records")
+                        .header("Authorization", bearer(patientToken))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(body)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.code").value(0))
+                .andExpect(jsonPath("$.data.reservationTime")
+                        .value(LocalDate.now() + " 08:00:00"));
     }
 
     @Test

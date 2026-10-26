@@ -47,6 +47,7 @@ public class RegistrationServiceImpl implements RegistrationService {
         this.auditLogService = auditLogService;
     }
 
+    //挂号事务入口
     @Override
     @Transactional(rollbackFor = Exception.class)
     public Reservation register(Reservation reservation, LoginUser operator) {

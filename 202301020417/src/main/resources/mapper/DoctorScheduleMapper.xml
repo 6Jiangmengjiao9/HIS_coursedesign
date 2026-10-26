@@ -96,6 +96,7 @@
         WHERE schedule_id = #{scheduleId}
     </update>
 
+    <!-- 号源扣减对应sql -->
     <update id="decreaseSlots" parameterType="java.lang.Integer">
         UPDATE doctor_schedule
         SET remaining_slots = remaining_slots - 1

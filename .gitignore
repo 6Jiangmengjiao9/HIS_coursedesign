@@ -10,3 +10,7 @@ node_modules/
 courseproject/
 .git_bak/
 *.log
+__pycache__/
+*.pyc
+.pytest_cache/
+~$*
